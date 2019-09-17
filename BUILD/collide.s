@@ -27,7 +27,6 @@
 	.import		_set_scroll_y
 	.export		_YellowSpr
 	.export		_BlueSpr
-	.export		_sprid
 	.export		_pad1
 	.export		_pad1_new
 	.export		_collision
@@ -1113,8 +1112,6 @@ _palette_sp:
 .segment	"BSS"
 
 .segment	"ZEROPAGE"
-_sprid:
-	.res	1,$00
 _pad1:
 	.res	1,$00
 _pad1_new:
@@ -1171,10 +1168,10 @@ _c_map:
 	ldx     #$00
 	lda     _which_bg
 	asl     a
-	bcc     L04EB
+	bcc     L04E7
 	inx
 	clc
-L04EB:	adc     #<(_All_Collision_Maps)
+L04E7:	adc     #<(_All_Collision_Maps)
 	sta     ptr1
 	txa
 	adc     #>(_All_Collision_Maps)
@@ -1208,7 +1205,7 @@ L04EB:	adc     #<(_All_Collision_Maps)
 ;
 	lda     #$00
 	sta     _temp_y
-L04EC:	lda     _temp_y
+L04E8:	lda     _temp_y
 	cmp     #$0F
 	bcs     L0433
 ;
@@ -1216,9 +1213,9 @@ L04EC:	lda     _temp_y
 ;
 	lda     #$00
 	sta     _temp_x
-L04ED:	lda     _temp_x
+L04E9:	lda     _temp_x
 	cmp     #$10
-	bcs     L04EF
+	bcs     L04EB
 ;
 ; temp1 = (temp_y << 4) + temp_x;
 ;
@@ -1235,7 +1232,7 @@ L04ED:	lda     _temp_x
 ;
 	ldy     _temp1
 	lda     _c_map,y
-	beq     L04EE
+	beq     L04EA
 ;
 ; vram_put(0x10); // wall
 ;
@@ -1248,78 +1245,78 @@ L04ED:	lda     _temp_x
 ;
 ; else{
 ;
-	jmp     L04E9
+	jmp     L04E5
 ;
 ; vram_put(0); // blank
 ;
-L04EE:	jsr     _vram_put
-;
-; vram_put(0);
-;
-	lda     #$00
-L04E9:	jsr     _vram_put
-;
-; for(temp_x = 0; temp_x < 16; ++temp_x){
-;
-	inc     _temp_x
-	jmp     L04ED
-;
-; for(temp_x = 0; temp_x < 16; ++temp_x){
-;
-L04EF:	lda     #$00
-	sta     _temp_x
-L04F0:	lda     _temp_x
-	cmp     #$10
-	bcs     L04F2
-;
-; temp1 = (temp_y << 4) + temp_x;
-;
-	lda     _temp_y
-	asl     a
-	asl     a
-	asl     a
-	asl     a
-	clc
-	adc     _temp_x
-	sta     _temp1
-;
-; if(c_map[temp1]){
-;
-	ldy     _temp1
-	lda     _c_map,y
-	beq     L04F1
-;
-; vram_put(0x10); // wall
-;
-	lda     #$10
-	jsr     _vram_put
-;
-; vram_put(0x10);
-;
-	lda     #$10
-;
-; else{
-;
-	jmp     L04EA
-;
-; vram_put(0); // blank
-;
-L04F1:	jsr     _vram_put
-;
-; vram_put(0);
-;
-	lda     #$00
 L04EA:	jsr     _vram_put
 ;
+; vram_put(0);
+;
+	lda     #$00
+L04E5:	jsr     _vram_put
+;
 ; for(temp_x = 0; temp_x < 16; ++temp_x){
 ;
 	inc     _temp_x
-	jmp     L04F0
+	jmp     L04E9
+;
+; for(temp_x = 0; temp_x < 16; ++temp_x){
+;
+L04EB:	lda     #$00
+	sta     _temp_x
+L04EC:	lda     _temp_x
+	cmp     #$10
+	bcs     L04EE
+;
+; temp1 = (temp_y << 4) + temp_x;
+;
+	lda     _temp_y
+	asl     a
+	asl     a
+	asl     a
+	asl     a
+	clc
+	adc     _temp_x
+	sta     _temp1
+;
+; if(c_map[temp1]){
+;
+	ldy     _temp1
+	lda     _c_map,y
+	beq     L04ED
+;
+; vram_put(0x10); // wall
+;
+	lda     #$10
+	jsr     _vram_put
+;
+; vram_put(0x10);
+;
+	lda     #$10
+;
+; else{
+;
+	jmp     L04E6
+;
+; vram_put(0); // blank
+;
+L04ED:	jsr     _vram_put
+;
+; vram_put(0);
+;
+	lda     #$00
+L04E6:	jsr     _vram_put
+;
+; for(temp_x = 0; temp_x < 16; ++temp_x){
+;
+	inc     _temp_x
+	jmp     L04EC
 ;
 ; for(temp_y = 0; temp_y < 15; ++temp_y){
 ;
-L04F2:	inc     _temp_y
-	jmp     L04EC
+L04EE:	inc     _temp_y
+	jmp     L04E8
 ;
 ; ppu_on_all(); // turn on screen
 ;
@@ -1342,31 +1339,18 @@ L0433:	jmp     _ppu_on_all
 ;
 	jsr     _oam_clear
 ;
-; sprid = 0;
+; oam_meta_spr(BoxGuy1.X, BoxGuy1.Y, YellowSpr);
 ;
-	lda     #$00
-	sta     _sprid
-;
-; sprid = oam_meta_spr(BoxGuy1.X, BoxGuy1.Y, sprid, YellowSpr);
-;
-	jsr     decsp3
+	jsr     decsp2
 	lda     _BoxGuy1
-	ldy     #$02
+	ldy     #$01
 	sta     (sp),y
 	lda     _BoxGuy1+1
 	dey
 	sta     (sp),y
-	lda     _sprid
-	dey
-	sta     (sp),y
 	lda     #<(_YellowSpr)
 	ldx     #>(_YellowSpr)
-	jsr     _oam_meta_spr
-	sta     _sprid
-;
-; }
-;
-	rts
+	jmp     _oam_meta_spr
 
 .endproc
 
@@ -1385,7 +1369,7 @@ L0433:	jmp     _ppu_on_all
 ;
 	lda     _pad1
 	and     #$02
-	beq     L04F5
+	beq     L04F1
 ;
 ; BoxGuy1.X -= 1;
 ;
@@ -1393,10 +1377,10 @@ L0433:	jmp     _ppu_on_all
 ;
 ; else if (pad1 & PAD_RIGHT){
 ;
-	jmp     L047B
-L04F5:	lda     _pad1
+	jmp     L0477
+L04F1:	lda     _pad1
 	and     #$01
-	beq     L047B
+	beq     L0477
 ;
 ; BoxGuy1.X += 1;
 ;
@@ -1404,27 +1388,27 @@ L04F5:	lda     _pad1
 ;
 ; bg_collision((char *)&BoxGuy1);
 ;
-L047B:	lda     #<(_BoxGuy1)
+L0477:	lda     #<(_BoxGuy1)
 	ldx     #>(_BoxGuy1)
 	jsr     _bg_collision
 ;
 ; if(collision_R) BoxGuy1.X -= 1;
 ;
 	lda     _collision_R
-	beq     L0481
+	beq     L047D
 	dec     _BoxGuy1
 ;
 ; if(collision_L) BoxGuy1.X += 1;
 ;
-L0481:	lda     _collision_L
-	beq     L0485
+L047D:	lda     _collision_L
+	beq     L0481
 	inc     _BoxGuy1
 ;
 ; if(pad1 & PAD_UP){
 ;
-L0485:	lda     _pad1
+L0481:	lda     _pad1
 	and     #$08
-	beq     L04F6
+	beq     L04F2
 ;
 ; BoxGuy1.Y -= 1;
 ;
@@ -1432,10 +1416,10 @@ L0485:	lda     _pad1
 ;
 ; else if (pad1 & PAD_DOWN){
 ;
-	jmp     L048E
-L04F6:	lda     _pad1
+	jmp     L048A
+L04F2:	lda     _pad1
 	and     #$04
-	beq     L048E
+	beq     L048A
 ;
 ; BoxGuy1.Y += 1;
 ;
@@ -1443,25 +1427,25 @@ L04F6:	lda     _pad1
 ;
 ; bg_collision((char *)&BoxGuy1);
 ;
-L048E:	lda     #<(_BoxGuy1)
+L048A:	lda     #<(_BoxGuy1)
 	ldx     #>(_BoxGuy1)
 	jsr     _bg_collision
 ;
 ; if(collision_D) BoxGuy1.Y -= 1;
 ;
 	lda     _collision_D
-	beq     L0494
+	beq     L0490
 	dec     _BoxGuy1+1
 ;
 ; if(collision_U) BoxGuy1.Y += 1;
 ;
-L0494:	lda     _collision_U
-	beq     L0498
+L0490:	lda     _collision_U
+	beq     L0494
 	inc     _BoxGuy1+1
 ;
 ; } 
 ;
-L0498:	rts
+L0494:	rts
 
 .endproc
 
@@ -1553,7 +1537,7 @@ L0498:	rts
 ;
 	lda     _temp3
 	cmp     #$F0
-	bcc     L04FE
+	bcc     L04FA
 ;
 ; }
 ;
@@ -1561,7 +1545,7 @@ L0498:	rts
 ;
 ; coordinates = (temp1 >> 4) + (temp3 & 0xf0); // upper left
 ;
-L04FE:	lda     _temp1
+L04FA:	lda     _temp1
 	lsr     a
 	lsr     a
 	lsr     a
@@ -1577,7 +1561,7 @@ L04FE:	lda     _temp1
 ;
 	ldy     _coordinates
 	lda     _c_map,y
-	beq     L04F7
+	beq     L04F3
 ;
 ; ++collision_L;
 ;
@@ -1589,7 +1573,7 @@ L04FE:	lda     _temp1
 ;
 ; coordinates = (temp2 >> 4) + (temp3 & 0xf0); // upper right
 ;
-L04F7:	lda     _temp2
+L04F3:	lda     _temp2
 	lsr     a
 	lsr     a
 	lsr     a
@@ -1605,7 +1589,7 @@ L04F7:	lda     _temp2
 ;
 	ldy     _coordinates
 	lda     _c_map,y
-	beq     L04F8
+	beq     L04F4
 ;
 ; ++collision_R;
 ;
@@ -1617,9 +1601,9 @@ L04F7:	lda     _temp2
 ;
 ; if(temp4 >= 0xf0) return;
 ;
-L04F8:	lda     _temp4
+L04F4:	lda     _temp4
 	cmp     #$F0
-	bcs     L04D7
+	bcs     L04D3
 ;
 ; coordinates = (temp1 >> 4) + (temp4 & 0xf0); // bottom left
 ;
@@ -1639,7 +1623,7 @@ L04F8:	lda     _temp4
 ;
 	ldy     _coordinates
 	lda     _c_map,y
-	beq     L04F9
+	beq     L04F5
 ;
 ; ++collision_L;
 ;
@@ -1651,7 +1635,7 @@ L04F8:	lda     _temp4
 ;
 ; coordinates = (temp2 >> 4) + (temp4 & 0xf0); // bottom right
 ;
-L04F9:	lda     _temp2
+L04F5:	lda     _temp2
 	lsr     a
 	lsr     a
 	lsr     a
@@ -1667,7 +1651,7 @@ L04F9:	lda     _temp2
 ;
 	ldy     _coordinates
 	lda     _c_map,y
-	beq     L04D7
+	beq     L04D3
 ;
 ; ++collision_R;
 ;
@@ -1679,7 +1663,7 @@ L04F9:	lda     _temp2
 ;
 ; }
 ;
-L04D7:	jmp     incsp2
+L04D3:	jmp     incsp2
 
 .endproc
 
@@ -1698,7 +1682,7 @@ L04D7:	jmp     incsp2
 ;
 	lda     _pad1_new
 	and     #$10
-	beq     L04DE
+	beq     L04DA
 ;
 ; ++which_bg;
 ;
@@ -1708,17 +1692,17 @@ L04D7:	jmp     incsp2
 ;
 	lda     _which_bg
 	cmp     #$04
-	bcc     L04E1
+	bcc     L04DD
 	lda     #$00
 	sta     _which_bg
 ;
 ; draw_bg();
 ;
-L04E1:	jmp     _draw_bg
+L04DD:	jmp     _draw_bg
 ;
 ; }
 ;
-L04DE:	rts
+L04DA:	rts
 
 .endproc
 
