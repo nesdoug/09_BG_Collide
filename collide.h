@@ -34,7 +34,7 @@ struct BoxGuy {
 	unsigned char height;
 };
 
-struct BoxGuy BoxGuy1 = {64,80,15,15};
+struct BoxGuy BoxGuy1 = {64,80,15,14};
 
 
 
@@ -76,6 +76,6 @@ const unsigned char palette_sp[]={
 void draw_bg(void);
 void draw_sprites(void);
 void movement(void);	
-void bg_collision(char * object);
+void bg_collision(void);
 void check_start(void);
 

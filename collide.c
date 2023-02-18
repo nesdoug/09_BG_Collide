@@ -62,7 +62,7 @@ void draw_bg(void){
 	// this sets a start position on the BG, top left of screen
 	vram_adr(NAMETABLE_A);
 	
-	// draw the tiles
+	// draw a row of tiles
 	for(temp_y = 0; temp_y < 15; ++temp_y){
 		for(temp_x = 0; temp_x < 16; ++temp_x){
 			temp1 = (temp_y << 4) + temp_x;
@@ -77,7 +77,7 @@ void draw_bg(void){
 			}
 		}
 		
-		// do twice
+		// draw a second row of tiles
 		for(temp_x = 0; temp_x < 16; ++temp_x){
 			temp1 = (temp_y << 4) + temp_x;
 
@@ -115,7 +115,7 @@ void movement(void){
 		BoxGuy1.X += 1;
 	}
 	
-	bg_collision((char *)&BoxGuy1);
+	bg_collision();
 	if(collision_R) BoxGuy1.X -= 1;
 	if(collision_L) BoxGuy1.X += 1;
 	
@@ -126,54 +126,56 @@ void movement(void){
 		BoxGuy1.Y += 1;
 	}
 	
-	bg_collision((char *)&BoxGuy1);
+	bg_collision();
 	if(collision_D) BoxGuy1.Y -= 1;
 	if(collision_U) BoxGuy1.Y += 1;
 }	
 
 
 
-void bg_collision(char * object){
+void bg_collision(){
 	// sprite collision with backgrounds
-	// object expected to have first 4 bytes as x,y,width,height
-	// casting to char* so this function could work for any sized structs
+	
 	collision_L = 0;
 	collision_R = 0;
 	collision_U = 0;
 	collision_D = 0;
 	
-	temp1 = object[0]; // left side
-	temp2 = temp1 + object[2]; // right side
-	temp3 = object[1]; // top side
-	temp4 = temp3 + object[3]; // bottom side
+	temp_x = BoxGuy1.X; // left side
+	temp_y = BoxGuy1.Y; // top side
 	
-	if(temp3 >= 0xf0) return;
+	if(temp_y >= 0xf0) return;
 	// y out of range
 	
-	coordinates = (temp1 >> 4) + (temp3 & 0xf0); // upper left
+	coordinates = (temp_x >> 4) + (temp_y & 0xf0); // upper left
 	if(c_map[coordinates]){ // find a corner in the collision map
 		++collision_L;
 		++collision_U;
 	}
 	
-	coordinates = (temp2 >> 4) + (temp3 & 0xf0); // upper right
+	temp_x = BoxGuy1.X + BoxGuy1.width; // right side
+	
+	coordinates = (temp_x >> 4) + (temp_y & 0xf0); // upper right
 	if(c_map[coordinates]){
 		++collision_R;
 		++collision_U;
 	}
 	
-	if(temp4 >= 0xf0) return;
+	temp_y = BoxGuy1.Y + BoxGuy1.height; // bottom side
+	if(temp_y >= 0xf0) return;
 	// y out of range
 	
-	coordinates = (temp1 >> 4) + (temp4 & 0xf0); // bottom left
+	coordinates = (temp_x >> 4) + (temp_y & 0xf0); // bottom right
 	if(c_map[coordinates]){
-		++collision_L;
+		++collision_R;
 		++collision_D;
 	}
 	
-	coordinates = (temp2 >> 4) + (temp4 & 0xf0); // bottom right
+	temp_x = BoxGuy1.X; // left side
+	
+	coordinates = (temp_x >> 4) + (temp_y & 0xf0); // bottom left
 	if(c_map[coordinates]){
-		++collision_R;
+		++collision_L;
 		++collision_D;
 	}
 }
